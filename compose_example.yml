@@ -1,0 +1,7 @@
+services:
+  music_maniac:
+    container_name: music_maniac
+    image: nickipp/music_maniac:latest
+    environment:
+      discord_token: "token"
+    restart: unless-stopped
