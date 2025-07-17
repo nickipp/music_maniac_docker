@@ -12,5 +12,5 @@ docker build -t tagname .
 # Running
 
 ```
-docker run -d --restart unless-stopped -e discord_token=token_here --name music_maniac tagname:latest
+docker run -d --restart unless-stopped -e discord_token=token_here --name music_maniac nickipp/music_maniac:latest
 ```
