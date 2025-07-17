@@ -1,2 +1,2 @@
 # music_maniac_docker
-Dockerized version of Music Maniac
+Dockerized version of Music Maniac Discord Bot
