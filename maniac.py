@@ -25,11 +25,6 @@ def run_bot():
     async def on_ready():
         print(f'{client.user} is now jamming')
 
-    async def play_next(ctx):
-        if queues[ctx.guild.id] != []:
-            link = queues[ctx.guild.id].pop(0)
-            await play(ctx, link=link)
-
     @client.command(name="play")
     async def play(ctx, *, link):
         try:
@@ -37,33 +32,49 @@ def run_bot():
             voice_clients[voice_client.guild.id] = voice_client
         except Exception as e:
             print(e)
+        if voice_clients[ctx.guild.id].is_playing() == True:
+            if ctx.guild.id not in queues:
+                queues[ctx.guild.id] = []
+            queues[ctx.guild.id].append(link)
+            await ctx.send("Added to queue!")
+            # await ctx.send(queues)
+        else:
+            try:
+                if youtube_base_url not in link:
+                    query_string = urllib.parse.urlencode({
+                        'search_query': link
+                    })
 
-        try:
-            if youtube_base_url not in link:
-                query_string = urllib.parse.urlencode({
-                    'search_query': link
-                })
+                    content = urllib.request.urlopen(
+                        youtube_results_url + query_string
+                    )
 
-                content = urllib.request.urlopen(
-                    youtube_results_url + query_string
-                )
+                    search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
 
-                search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
+                    link = youtube_watch_url + search_results[0]
 
-                link = youtube_watch_url + search_results[0]
+                loop = asyncio.get_event_loop()
+                data = await loop.run_in_executor(None, lambda: ytdl.extract_info(link, download=False))
 
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(link, download=False))
+                song = data['url']
+                player = discord.FFmpegOpusAudio(song, **ffmpeg_options)
 
-            song = data['url']
-            player = discord.FFmpegOpusAudio(song, **ffmpeg_options)
+                voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), client.loop))
 
-            voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), client.loop))
-        except Exception as e:
-            print(e)
+            except Exception as e:
+                print(e)
+
+    async def play_next(ctx):
+        if ctx.guild.id in queues:
+            link = queues[ctx.guild.id].pop(0)
+            if queues[ctx.guild.id] == []:
+                del queues[ctx.guild.id]
+            await play(ctx, link=link)
+        else:
+            await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
 
     @client.command(name="clear_queue")
-    async def clear_queue(ctx):
+    async def clear_queue(ctx): 
         if ctx.guild.id in queues:
             queues[ctx.guild.id].clear()
             await ctx.send("Queue cleared!")
@@ -99,6 +110,6 @@ def run_bot():
             queues[ctx.guild.id] = []
         queues[ctx.guild.id].append(url)
         await ctx.send("Added to queue!")
+        await ctx.send(queues)
 
     client.run(TOKEN)
-
