@@ -1,5 +1,6 @@
 # music_maniac_docker
 Dockerized version of [Music Maniac Discord Bot](https://github.com/MasterReach1/discord-bots)
+
 [Docker Hub](https://hub.docker.com/repository/docker/nickipp/music_maniac/)
 
 # Building
