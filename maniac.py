@@ -25,7 +25,6 @@ def run_bot():
     async def on_ready():
         print(f'{client.user} is now jamming')
 
-    # @client.command(name="play")
     async def play(ctx, *, link):
         try:
             voice_client = await ctx.author.voice.channel.connect()
@@ -54,47 +53,41 @@ def run_bot():
             player = discord.FFmpegOpusAudio(song, **ffmpeg_options)
 
             voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), client.loop))
-            if queues[ctx.guild.id] == []:
-                del queues[ctx.guild.id]
 
         except Exception as e:
             print(e)
 
     async def play_next(ctx):
         if ctx.guild.id in queues:
+            if queues[ctx.guild.id] == []:
+                del queues[ctx.guild.id]
             link = queues[ctx.guild.id].pop(0)
             await play(ctx, link=link)
         else:
             await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
 
     @client.command(name="clear_queue")
-    async def clear_queue(ctx): 
+    async def clear_queue(ctx):
         if ctx.guild.id in queues:
             queues[ctx.guild.id].clear()
             await ctx.send("Queue cleared!")
         else:
             await ctx.send("There is no queue to clear")
 
-    @client.command(name="pause")
-    async def pause(ctx):
-        try:
-            voice_clients[ctx.guild.id].pause()
-        except Exception as e:
-            print(e)
-
-    @client.command(name="resume")
-    async def resume(ctx):
-        try:
-            voice_clients[ctx.guild.id].resume()
-        except Exception as e:
-            print(e)
-
     @client.command(name="stop")
     async def stop(ctx):
         try:
+            await clear_queue(ctx)
             voice_clients[ctx.guild.id].stop()
             await voice_clients[ctx.guild.id].disconnect()
             del voice_clients[ctx.guild.id]
+        except Exception as e:
+            print(e)
+
+    @client.command(name="skip")
+    async def skip(ctx):
+        try:
+            voice_clients[ctx.guild.id].stop()
         except Exception as e:
             print(e)
 
