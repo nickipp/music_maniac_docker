@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 import asyncio
 import yt_dlp
-import urllib.parse, urllib.request, re
+import urlcheck
 
 def run_bot():
     TOKEN = os.getenv('discord_token')
@@ -33,18 +33,12 @@ def run_bot():
             print(e)
 
         try:
-            if youtube_base_url not in link:
-                query_string = urllib.parse.urlencode({
-                    'search_query': link
-                })
-
-                content = urllib.request.urlopen(
-                    youtube_results_url + query_string
-                )
-
-                search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
-
-                link = youtube_watch_url + search_results[0]
+            print(link)
+            link = await urlcheck.clean_url(await urlcheck.yourl(link))
+            print(link)
+            if link == "invalid":
+                ctx.send("Invalid URL")
+                asyncio.run_coroutine_threadsafe(play_next(ctx),client.loop)
 
             loop = asyncio.get_event_loop()
             data = await loop.run_in_executor(None, lambda: ytdl.extract_info(link, download=False))
@@ -61,9 +55,10 @@ def run_bot():
         if ctx.guild.id in queues:
             if queues[ctx.guild.id] == []:
                 del queues[ctx.guild.id]
+                await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
             link = queues[ctx.guild.id].pop(0)
             await play(ctx, link=link)
-        else:
+        if ctx.guild.id not in queues:
             await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
 
     @client.command(name="clear_queue")
