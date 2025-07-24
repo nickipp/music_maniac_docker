@@ -210,3 +210,4 @@ __marimo__/
 bin/
 share/
 include/
+pyvenv.cfg
