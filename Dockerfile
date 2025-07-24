@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 COPY main.py ./
 COPY maniac.py ./
+COPY urlcheck.py ./
 
 RUN apk update
 RUN apk upgrade
