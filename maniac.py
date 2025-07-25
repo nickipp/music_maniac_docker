@@ -13,9 +13,6 @@ def run_bot():
 
     queues = {}
     voice_clients = {}
-    youtube_base_url = 'https://www.youtube.com/'
-    youtube_results_url = youtube_base_url + 'results?'
-    youtube_watch_url = youtube_base_url + 'watch?v='
     yt_dl_options = {"format": "bestaudio/best"}
     ytdl = yt_dlp.YoutubeDL(yt_dl_options)
 
