@@ -1,15 +1,9 @@
 import urllib.parse, urllib.request, re
 
 async def yourl(url):
-    is_url = False
     youtube_urls = ["www.youtube.com","m.youtube.com","youtu.be"]
 
     if (url[0:7] == "http://") or (url[0:8] == "https://"):
-        is_url = True
-    else:
-        is_url = False
-
-    if is_url == True:
         if any(x in url for x in youtube_urls):
             return url
         else:
@@ -30,6 +24,7 @@ async def yourl(url):
         search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
 
         link = youtube_watch_url + search_results[0]
+
         return link
 
 async def clean_url(url):
@@ -46,8 +41,3 @@ async def clean_url(url):
                 return out
             out += char
         return out
-
-if __name__ == "__main__":
-    txts = ["https://www.youtube.com/watch?v=e-LpgXW20MM&list=RDe-LpgXW20MM","https://youtu.be/4yMX84KyfKM?si=KDsN3AtO1xmroNWY","https://bruh.com","nope","linkin park numb"]
-    for i in txts:
-        print(clean_url(yourl(i)))
