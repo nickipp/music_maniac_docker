@@ -17,7 +17,7 @@ async def yourl(url):
             'search_query': url
         })
 
-        content = urllib.request.urlopen(
+        content = await urllib.request.urlopen(
             youtube_results_url + query_string
         )
 
@@ -27,17 +27,16 @@ async def yourl(url):
 
         return link
 
-async def clean_url(url):
+def clean_url(url):
     out = ""
     if ("www.youtube.com" in url) or ("m.youtube.com" in url):
         for char in url:
             if char == "&":
                 return out
             out += char
-        return out
     else:
         for char in url:
             if char == "?":
                 return out
             out += char
-        return out
+    return out
