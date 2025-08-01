@@ -31,7 +31,9 @@ def run_bot():
 
         try:
             print(link)
-            link = await urlcheck.clean_url(await urlcheck.yourl(link))
+            link = urlcheck.clean_url(
+                await urlcheck.yourl(link)
+                )
             print(link)
             if link == "invalid":
                 ctx.send("Invalid URL")
@@ -54,9 +56,7 @@ def run_bot():
                 del queues[ctx.guild.id]
                 await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
             link = queues[ctx.guild.id].pop(0)
-            await play(ctx, link=link)
-        if ctx.guild.id not in queues:
-            await asyncio.run_coroutine_threadsafe(stop(ctx), client.loop)
+            await asyncio.run_coroutine_threadsafe(play(ctx, link=link), client.loop)
 
     @client.command(name="clear_queue")
     async def clear_queue(ctx):
